@@ -63,6 +63,20 @@ app.post('/api', async (req, res) => {
     res.json({ message: 'Data added successfully' });
 });
 
+app.put('/api/:id', async (req, res) => {
+    try {
+        const updatedData = await DataModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+        if (!updatedData) {
+            return res.status(404).json({ message: 'Data not found', data: req.body });
+        }
+
+        res.json({ message: 'Data updated successfully', _id: updatedData._id });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating data', error: error.message });
+    }
+});
+
 // DELETE a record
 app.delete('/api/:id', async (req, res) => {
     await DataModel.findByIdAndDelete(req.params.id);
