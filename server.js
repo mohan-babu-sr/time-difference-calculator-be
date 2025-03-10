@@ -21,6 +21,7 @@ const DataSchema = new mongoose.Schema({
     date: Date,
     inTime: String,
     outTime: String,
+    location: String
 });
 const DataModel = mongoose.model('Data', DataSchema);
 
