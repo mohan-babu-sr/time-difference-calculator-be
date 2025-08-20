@@ -34,25 +34,47 @@ app.get('/api', async (req, res) => {
 // GET a record by Date
 app.get('/api/filter', async (req, res) => {
     try {
+        let filteredData = [];
         const { date } = req.query;
-
-        if (!date) {
-            return res.status(400).json({ message: 'Please provide a date in YYYY-MM-DD format' });
-        }
-
-        const selectedDate = new Date(date);
-        const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999));
-
-        const filteredData = await DataModel.find({
-            date: {
-                $gte: startOfDay,
-                $lte: endOfDay
+        const { monthYear } = req.query;
+        console.log(monthYear);
+        if (date) {
+            if (!date) {
+                return res.status(400).json({ message: 'Please provide a date in YYYY-MM-DD format' });
             }
-        });
+
+            const selectedDate = new Date(date);
+            const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999));
+
+            filteredData = await DataModel.find({
+                date: {
+                    $gte: startOfDay,
+                    $lte: endOfDay
+                }
+            });
+        } else if (monthYear) {
+            if (!/^\d{4}-\d{2}$/.test(monthYear)) {
+                return res.status(400).json({ message: 'Please provide a month in YYYY-MM format' });
+            }
+            
+            const [year, monthNum] = monthYear.split('-').map(Number);
+            const startOfMonth = new Date(year, monthNum - 1, 1);
+            const endOfMonth = new Date(year, monthNum, 0, 23, 59, 59, 999);
+            
+            filteredData = await DataModel.find({
+                date: {
+                    $gte: startOfMonth,
+                    $lte: endOfMonth
+                }
+            });
+        } else {
+            return res.status(400).json({ message: 'Please provide either date or month parameter' });
+        }
 
         res.json(filteredData);
     } catch (error) {
+        console.error('Error fetching data:', error);
         res.status(500).json({ message: 'Error fetching data', error });
     }
 });
