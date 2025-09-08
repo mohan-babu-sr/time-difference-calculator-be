@@ -28,7 +28,7 @@ const DataModel = mongoose.model('Data', DataSchema);
 // GET all records
 app.get('/api', async (req, res) => {
     const data = await DataModel.find();
-    res.json(data);
+    res.status(200).json(data);
 });
 
 // GET a record by Date
@@ -37,7 +37,7 @@ app.get('/api/filter', async (req, res) => {
         let filteredData = [];
         const { date } = req.query;
         const { monthYear } = req.query;
-        console.log(monthYear);
+        console.log('monthYear: ', monthYear);
         if (date) {
             if (!date) {
                 return res.status(400).json({ message: 'Please provide a date in YYYY-MM-DD format' });
@@ -73,7 +73,7 @@ app.get('/api/filter', async (req, res) => {
         }
         console.log('Filter API called: ', filteredData);
 
-        res.json(filteredData);
+        res.status(200).json(filteredData);
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).json({ message: 'Error fetching data', error });
@@ -83,8 +83,12 @@ app.get('/api/filter', async (req, res) => {
 // POST a new record
 app.post('/api', async (req, res) => {
     const newData = new DataModel(req.body);
-    await newData.save();
-    res.json({ message: 'Data added successfully' });
+    try {
+        await newData.save();
+        res.status(200).json({ message: 'Data added successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding data', error: error.message });
+    }
 });
 
 app.put('/api/:id', async (req, res) => {
@@ -95,7 +99,7 @@ app.put('/api/:id', async (req, res) => {
             return res.status(404).json({ message: 'Data not found', data: req.body });
         }
 
-        res.json({ message: 'Data updated successfully', _id: updatedData._id });
+        res.status(200).json({ message: 'Data updated successfully', _id: updatedData._id });
     } catch (error) {
         res.status(500).json({ message: 'Error updating data', error: error.message });
     }
@@ -103,8 +107,12 @@ app.put('/api/:id', async (req, res) => {
 
 // DELETE a record
 app.delete('/api/:id', async (req, res) => {
-    await DataModel.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Data deleted successfully' });
+    try {
+        await DataModel.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: 'Data deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting data - ' + req.params.id, error: error.message });
+    }
 });
 
 // Start server
