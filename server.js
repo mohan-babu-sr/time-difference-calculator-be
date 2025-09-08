@@ -71,6 +71,7 @@ app.get('/api/filter', async (req, res) => {
         } else {
             return res.status(400).json({ message: 'Please provide either date or month parameter' });
         }
+        console.log('Filter API called: ', filteredData);
 
         res.json(filteredData);
     } catch (error) {
