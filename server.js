@@ -57,11 +57,11 @@ app.get('/api/filter', async (req, res) => {
             if (!/^\d{4}-\d{2}$/.test(monthYear)) {
                 return res.status(400).json({ message: 'Please provide a month in YYYY-MM format' });
             }
-            
+
             const [year, monthNum] = monthYear.split('-').map(Number);
             const startOfMonth = new Date(year, monthNum - 1, 1);
             const endOfMonth = new Date(year, monthNum, 0, 23, 59, 59, 999);
-            
+
             filteredData = await DataModel.find({
                 date: {
                     $gte: startOfMonth,
